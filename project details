@@ -1,0 +1,44 @@
+📌 Project Title
+
+QuizNova – Interactive Questions and Quiz Application
+
+❗ Problem Statement
+
+Students and learners often struggle to find a simple and interactive platform to practice questions and test their knowledge. Most existing systems are either too complex, not user-friendly, or require internet-based platforms with distractions. There is a need for a lightweight, easy-to-use quiz application that helps users practice questions and evaluate their performance instantly.
+
+🎯 Objective
+
+The main objective of this project is to develop a simple and interactive quiz application that:
+
+Provides multiple-choice questions (MCQs)
+Allows users to attempt quizzes easily
+Calculates and displays scores instantly
+Improves learning and self-assessment
+Offers a clean and user-friendly interface
+💡 Proposed Solution
+
+We propose a web-based Quiz Application where:
+
+Users can start a quiz with one click
+Questions are displayed one by one
+Users select answers from given options
+The system evaluates answers automatically
+Final score is displayed at the end
+⚙️ Features
+📝 Multiple Choice Questions (MCQs)
+⏱️ Optional timer per question
+📊 Instant score calculation
+🔄 Restart quiz option
+🎨 Simple and responsive UI
+🛠️ Technology Stack
+Frontend: HTML, CSS, JavaScript
+Backend (optional): Python Flask / Node.js
+Database (optional): JSON / MongoDB / MySQL
+🎯 Target Users
+School students
+College learners
+Competitive exam aspirants
+Anyone who wants to test knowledge
+📈 Expected Outcome
+
+A fully working quiz system that helps users learn, practice, and evaluate their knowledge in an interactive and engaging way.
