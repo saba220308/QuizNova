@@ -48,7 +48,7 @@ Many learners struggle to find a simple and distraction-free platform for practi
 ## 👨‍💻 Author
 
 **Your Name**
-Student / Developer
+sabarish 
 
 * GitHub: [https://github.com/your-username](https://github.com/your-username)
 * Project: QuizNova
