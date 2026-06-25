@@ -1,1 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova — Teacher Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0C1628;--card:#132035;--card2:#1C2E48;--card3:#243756;--border:#1E3250;
+  --blue:#3B6FFF;--blue-d:rgba(59,111,255,.18);--blue-g:rgba(59,111,255,.3);
+  --violet:#7C3AED;--green:#10B981;--green-d:rgba(16,185,129,.15);
+  --amber:#F59E0B;--coral:#EF4444;--slate:#7B90B0;--slate2:#4A607E;
+  --white:#EEF2FF;--r:14px;
+}
+html,body{min-height:100vh;background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);font-size:14px;}
+button{font-family:'Inter',sans-serif;cursor:pointer;}
+input,textarea,select{font-family:'Inter',sans-serif;}
 
+/* ══ AUTH SCREENS ══ */
+.auth-screen{display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:24px 16px;}
+.auth-screen.active{display:flex;}
+.nova-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+.nova-star{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--violet));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 18px var(--blue-g);}
+.nova-wm{font-family:'Syne',sans-serif;font-weight:800;font-size:1.65rem;letter-spacing:-.5px;}
+.nova-wm em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:420px;padding:28px;}
+.auth-card h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:4px;}
+.auth-card p{color:var(--slate);font-size:.82rem;margin-bottom:22px;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.role-btn{background:var(--card2);border:2px solid transparent;border-radius:12px;padding:22px 14px 18px;text-align:center;color:var(--white);transition:border-color .2s,transform .15s;}
+.role-btn:hover{transform:translateY(-2px);}
+.role-btn.t:hover{border-color:var(--blue);}
+.role-btn.s:hover{border-color:var(--green);}
+.role-btn .ri{font-size:2.2rem;display:block;margin-bottom:10px;}
+.role-btn .rl{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;display:block;margin-bottom:4px;}
+.role-btn .rd{font-size:.72rem;color:var(--slate);display:block;}
+.a-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:18px;gap:3px;}
+.a-tab{background:none;border:none;border-radius:8px;padding:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--slate);transition:background .18s,color .18s;}
+.a-tab.on{color:#fff;}
+.a-tab.t-on{background:var(--blue);}
+.a-tab.s-on{background:var(--green);}
+.a-form{display:none;}
+.a-form.on{display:block;}
+.f{margin-bottom:12px;}
+.f label{display:block;font-size:.72rem;font-weight:600;color:var(--slate);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
+.f input{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:9px;padding:11px 14px;color:var(--white);font-size:.9rem;outline:none;transition:border-color .18s;}
+.f input::placeholder{color:var(--slate2);}
+.f input:focus{border-color:var(--blue);}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pw-bar-wrap{height:3px;border-radius:2px;margin-top:5px;background:var(--bg);overflow:hidden;}
+.pw-bar{height:100%;border-radius:2px;width:0%;transition:width .3s,background .3s;}
+.sub-btn{width:100%;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-top:5px;transition:transform .15s,opacity .2s;}
+.sub-btn.t{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;box-shadow:0 4px 18px var(--blue-g);}
+.sub-btn.s{background:var(--green);color:#fff;box-shadow:0 4px 16px rgba(16,185,129,.3);}
+.sub-btn:hover{transform:translateY(-1px);}
+.a-msg{border-radius:9px;padding:9px 13px;font-size:.8rem;font-weight:500;margin-top:10px;display:none;gap:7px;}
+.a-msg.on{display:flex;}
+.a-msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--coral);}
+.a-msg.ok{background:var(--green-d);border:1px solid rgba(16,185,129,.3);color:var(--green);}
+.back-link{background:none;border:none;color:var(--slate);font-size:.8rem;margin-bottom:18px;display:flex;align-items:center;gap:5px;padding:0;transition:color .15s;}
+.back-link:hover{color:var(--white);}
+
+/* ══ APP SHELL ══ */
+#app{display:none;min-height:100vh;flex-direction:row;}
+#app.active{display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-logo{display:flex;align-items:center;gap:9px;padding:20px 18px 16px;}
+.sb-star{width:30px;height:30px;background:linear-gradient(135deg,var(--blue),var(--violet));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
+.sb-wm{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;}
+.sb-wm em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sb-user{margin:0 12px 16px;background:var(--card2);border-radius:10px;padding:11px 12px;display:flex;align-items:center;gap:9px;}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.8rem;flex-shrink:0;}
+.sb-uname{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-urole{font-size:.7rem;color:var(--slate);}
+.sb-nav{flex:1;padding:0 10px;}
+.sb-section{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate2);padding:12px 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:var(--slate);font-weight:500;font-size:.84rem;border:none;background:none;width:100%;text-align:left;transition:background .15s,color .15s;margin-bottom:2px;}
+.nav-item .ni{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.nav-item:hover{background:var(--card2);color:var(--white);}
+.nav-item.active{background:var(--blue-d);color:var(--blue);}
+.nav-item .nbadge{margin-left:auto;background:var(--blue);color:#fff;border-radius:100px;font-size:.62rem;font-weight:700;padding:1px 7px;}
+.sb-bottom{padding:14px 12px;}
+.signout-btn{width:100%;background:none;border:1px solid var(--border);border-radius:9px;padding:9px;color:var(--slate);font-size:.8rem;font-family:'Inter',sans-serif;transition:color .15s,border-color .15s;}
+.signout-btn:hover{color:var(--coral);border-color:rgba(239,68,68,.4);}
+
+/* MAIN CONTENT */
+.main{flex:1;overflow-y:auto;min-height:100vh;}
+.page{display:none;padding:28px;}
+.page.active{display:block;}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;}
+.page-sub{color:var(--slate);font-size:.82rem;margin-top:3px;}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:.83rem;box-shadow:0 4px 16px var(--blue-g);transition:transform .15s,opacity .15s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-secondary{background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:10px;padding:10px 16px;font-family:'Syne',sans-serif;font-weight:700;font-size:.83rem;transition:background .15s;display:inline-flex;align-items:center;gap:7px;}
+.btn-secondary:hover{background:var(--card3);}
+.btn-sm{padding:7px 13px;font-size:.78rem;}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--coral);border-radius:8px;padding:7px 12px;font-size:.78rem;font-weight:600;transition:background .15s;}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.stat-card{padding:18px 20px;}
+.stat-icon{font-size:1.4rem;margin-bottom:10px;}
+.stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:1.9rem;color:var(--blue);line-height:1;}
+.stat-lbl{color:var(--slate);font-size:.75rem;margin-top:4px;}
+.stat-change{font-size:.72rem;margin-top:6px;}
+.stat-change.up{color:var(--green);}
+
+/* SECTION TITLE */
+.sec-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);margin-bottom:12px;}
+
+/* TEST CARDS */
+.test-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px;}
+.test-card{padding:18px;position:relative;overflow:hidden;transition:border-color .2s;}
+.test-card:hover{border-color:var(--slate2);}
+.test-accent{position:absolute;top:0;left:0;right:0;height:3px;}
+.test-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px;}
+.test-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;line-height:1.3;}
+.test-type-badge{font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+.test-type-badge.quiz{background:var(--blue-d);color:var(--blue);}
+.test-type-badge.form{background:rgba(124,58,237,.15);color:#A78BFA;}
+.test-meta{color:var(--slate);font-size:.75rem;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.test-meta span{display:flex;align-items:center;gap:4px;}
+.test-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.toggle-wrap{display:flex;align-items:center;gap:7px;}
+.toggle{position:relative;width:34px;height:18px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;background:var(--card3);border-radius:100px;transition:background .2s;cursor:pointer;}
+.toggle input:checked+.toggle-track{background:var(--green);}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
+.toggle input:checked~.toggle-thumb{transform:translateX(16px);}
+.toggle-lbl{font-size:.75rem;color:var(--slate);}
+.test-actions{display:flex;gap:6px;}
+.icon-btn{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--slate);font-size:.82rem;transition:color .15s,background .15s;}
+.icon-btn:hover{background:var(--card3);color:var(--white);}
+.icon-btn.del:hover{background:rgba(239,68,68,.1);color:var(--coral);border-color:rgba(239,68,68,.3);}
+
+/* ══ QUIZ BUILDER ══ */
+.builder-layout{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start;}
+.builder-meta{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:18px;}
+.builder-meta h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:14px;}
+.b-input{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:9px;padding:11px 14px;color:var(--white);font-size:.9rem;outline:none;transition:border-color .18s;margin-bottom:10px;}
+.b-input::placeholder{color:var(--slate2);}
+.b-input:focus{border-color:var(--blue);}
+.b-select{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:9px;padding:11px 14px;color:var(--white);font-size:.9rem;outline:none;transition:border-color .18s;appearance:none;margin-bottom:10px;}
+.b-select:focus{border-color:var(--blue);}
+.b-select option{background:var(--card);}
+.b-label{font-size:.72rem;font-weight:600;color:var(--slate);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;display:block;}
+.b-field{margin-bottom:12px;}
+.q-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.q-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;}
+.q-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;}
+.q-num{font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;color:var(--blue);background:var(--blue-d);padding:3px 9px;border-radius:100px;}
+.q-type-lbl{font-size:.7rem;color:var(--slate);margin-left:auto;}
+.q-text{font-weight:500;font-size:.88rem;margin-bottom:10px;line-height:1.45;}
+.q-options{display:flex;flex-direction:column;gap:5px;}
+.q-opt{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;font-size:.83rem;}
+.q-opt.correct{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green);}
+.q-opt.wrong{background:var(--card2);color:var(--slate);}
+.q-opt .oi{font-size:.75rem;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.q-item-del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--slate2);font-size:.85rem;padding:4px 6px;border-radius:6px;transition:color .15s,background .15s;}
+.q-item-del:hover{color:var(--coral);background:rgba(239,68,68,.1);}
+.empty-qs{text-align:center;padding:36px 16px;color:var(--slate);background:var(--card2);border-radius:12px;border:1px dashed var(--border);}
+.empty-qs span{font-size:2rem;display:block;margin-bottom:10px;}
+
+/* Add question panel */
+.add-q-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:sticky;top:20px;}
+.add-q-panel h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:14px;}
+.q-type-tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap;}
+.q-type-tab{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:.76rem;font-weight:600;color:var(--slate);transition:background .15s,color .15s,border-color .15s;}
+.q-type-tab.on{background:var(--blue-d);border-color:var(--blue);color:var(--blue);}
+.option-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.option-row{display:flex;align-items:center;gap:7px;}
+.opt-radio{width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+.opt-input{flex:1;background:var(--card2);border:1.5px solid transparent;border-radius:8px;padding:9px 12px;color:var(--white);font-size:.85rem;outline:none;transition:border-color .18s;}
+.opt-input:focus{border-color:var(--blue);}
+.opt-input::placeholder{color:var(--slate2);}
+.opt-del{background:none;border:none;color:var(--slate2);font-size:.8rem;padding:4px;transition:color .15s;}
+.opt-del:hover{color:var(--coral);}
+.add-opt-btn{background:none;border:1px dashed var(--border);border-radius:8px;padding:8px 12px;color:var(--slate);font-size:.8rem;width:100%;transition:border-color .15s,color .15s;margin-bottom:12px;}
+.add-opt-btn:hover{border-color:var(--blue);color:var(--blue);}
+.correct-hint{font-size:.72rem;color:var(--slate);margin-bottom:10px;}
+
+/* Bulk import */
+.bulk-box{background:var(--card2);border:1px dashed var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+.bulk-box textarea{width:100%;background:transparent;border:none;color:var(--white);font-size:.8rem;font-family:'Inter',sans-serif;resize:vertical;min-height:100px;outline:none;line-height:1.6;}
+.bulk-box textarea::placeholder{color:var(--slate2);}
+.bulk-hint{font-size:.72rem;color:var(--slate);margin-top:6px;line-height:1.5;}
+
+/* ══ FORM BUILDER ══ */
+.form-canvas{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.form-field-card{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:16px;position:relative;transition:border-color .2s;}
+.form-field-card:hover{border-color:var(--slate2);}
+.form-field-card.dragging{opacity:.5;border-color:var(--blue);}
+.ffc-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.drag-handle{color:var(--slate2);font-size:.9rem;cursor:grab;}
+.ffc-type-badge{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:var(--card2);color:var(--slate);}
+.ffc-del{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--slate2);font-size:.82rem;padding:4px 6px;border-radius:6px;transition:color .15s,background .15s;}
+.ffc-del:hover{color:var(--coral);background:rgba(239,68,68,.1);}
+.ffc-required{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--slate);margin-top:8px;}
+.ffc-required input{accent-color:var(--blue);}
+.form-preview-field{margin-top:10px;}
+.form-preview-field label{display:block;font-size:.82rem;font-weight:500;margin-bottom:5px;}
+.form-preview-field .req-star{color:var(--coral);}
+.preview-input{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-size:.82rem;outline:none;cursor:default;}
+.preview-textarea{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-size:.82rem;outline:none;cursor:default;resize:none;min-height:64px;}
+.preview-option{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.83rem;color:var(--slate);}
+.preview-option input{accent-color:var(--blue);}
+.add-field-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.add-field-btn{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:8px 13px;color:var(--slate);font-size:.78rem;font-weight:500;transition:background .15s,color .15s,border-color .15s;display:flex;align-items:center;gap:6px;}
+.add-field-btn:hover{background:var(--card2);color:var(--white);border-color:var(--slate2);}
+
+/* ══ CLASSROOMS ══ */
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px;}
+.class-card-v2{padding:18px;position:relative;overflow:hidden;}
+.cc-accent{position:absolute;left:0;top:0;bottom:0;width:4px;}
+.cc-body{padding-left:14px;}
+.cc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:4px;}
+.cc-sub{font-size:.75rem;color:var(--slate);margin-bottom:12px;}
+.code-display{background:var(--card2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.code-lbl{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--slate);margin-bottom:3px;}
+.code-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:.2em;color:var(--blue);text-shadow:0 0 18px var(--blue-g);}
+.copy-btn{background:var(--blue-d);border:1px solid rgba(59,111,255,.3);border-radius:8px;padding:7px 12px;color:var(--blue);font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;transition:background .15s,color .15s;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.copy-btn:hover{background:var(--blue);color:#fff;}
+.copy-btn.copied{background:var(--green-d);border-color:rgba(16,185,129,.3);color:var(--green);}
+.cc-footer{display:flex;align-items:center;justify-content:space-between;}
+.cc-students{font-size:.75rem;color:var(--slate);}
+
+/* Create classroom form */
+.create-class-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px;}
+.create-class-box h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.chip{background:var(--card2);border:1.5px solid var(--border);border-radius:7px;padding:5px 11px;font-size:.75rem;font-weight:500;color:var(--slate);transition:all .15s;}
+.chip:hover{border-color:var(--blue);color:var(--blue);}
+.chip.on{border-color:var(--blue);background:var(--blue-d);color:var(--blue);}
+
+/* ══ RESULTS ══ */
+.results-filter{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.filter-btn{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:500;color:var(--slate);transition:all .15s;}
+.filter-btn.on{background:var(--blue-d);border-color:var(--blue);color:var(--blue);}
+.results-table{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
+.rt-head{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;gap:0;background:var(--card2);border-bottom:1px solid var(--border);}
+.rt-cell{padding:11px 16px;font-size:.73rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--slate);}
+.rt-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;border-bottom:1px solid var(--border);transition:background .15s;}
+.rt-row:last-child{border-bottom:none;}
+.rt-row:hover{background:var(--card2);}
+.rt-row .rt-cell{font-size:.83rem;font-weight:400;color:var(--white);text-transform:none;letter-spacing:0;}
+.score-bar-wrap{display:flex;align-items:center;gap:8px;}
+.score-bar{height:5px;border-radius:3px;background:var(--card2);flex:1;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--violet));}
+.score-pct{font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;color:var(--blue);white-space:nowrap;}
+.status-pill{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:100px;}
+.status-pill.done{background:rgba(16,185,129,.15);color:var(--green);}
+.status-pill.pend{background:rgba(123,144,176,.1);color:var(--slate);}
+
+/* ══ STUDENT SCREENS ══ */
+.student-app{display:none;min-height:100vh;flex-direction:column;align-items:center;padding:32px 16px 48px;}
+.student-app.active{display:flex;}
+.s-topbar{width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+.s-user-pill{display:flex;align-items:center;gap:8px;background:var(--green-d);border:1px solid rgba(16,185,129,.25);border-radius:100px;padding:5px 13px 5px 6px;}
+.s-avatar{width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.75rem;}
+.s-uname{font-size:.8rem;font-weight:600;color:var(--green);}
+.s-signout{background:none;border:none;color:var(--slate);font-size:.77rem;}
+.s-signout:hover{color:var(--coral);}
+.s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:640px;padding:28px;}
+
+/* Join code */
+.join-code-wrap{background:var(--card2);border-radius:12px;padding:20px;margin-bottom:16px;}
+.join-code-wrap h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:5px;}
+.join-code-wrap p{color:var(--slate);font-size:.78rem;margin-bottom:14px;}
+.code-row{display:flex;gap:9px;}
+.code-inp{flex:1;background:var(--card);border:2px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;letter-spacing:.18em;text-transform:uppercase;text-align:center;outline:none;transition:border-color .18s;}
+.code-inp::placeholder{font-size:.9rem;font-weight:400;letter-spacing:.03em;color:var(--slate2);}
+.code-inp:focus{border-color:var(--blue);}
+.lookup-btn{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:none;border-radius:10px;padding:13px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;box-shadow:0 4px 14px var(--blue-g);transition:transform .15s;white-space:nowrap;}
+.lookup-btn:hover{transform:translateY(-1px);}
+.join-msg{border-radius:9px;padding:9px 13px;font-size:.8rem;font-weight:500;margin-top:10px;display:none;gap:7px;}
+.join-msg.on{display:flex;}
+.join-msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--coral);}
+.join-msg.ok{background:var(--green-d);border:1px solid rgba(16,185,129,.3);color:var(--green);}
+.found-card{background:var(--card2);border:2px solid var(--blue);border-radius:12px;padding:16px;display:none;margin-bottom:12px;position:relative;overflow:hidden;}
+.found-card.on{display:block;}
+.found-accent{position:absolute;left:0;top:0;bottom:0;width:4px;}
+.found-body{padding-left:14px;}
+.found-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:4px;}
+.found-detail{font-size:.78rem;color:var(--slate);margin-bottom:2px;}
+.start-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;box-shadow:0 4px 18px rgba(16,185,129,.3);transition:transform .15s;display:none;margin-bottom:12px;}
+.start-btn.on{display:block;}
+.start-btn:hover{transform:translateY(-1px);}
+
+/* Quiz play */
+.progress-track{width:100%;height:4px;background:var(--card2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.q-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;}
+.q-class-pill{display:flex;align-items:center;gap:6px;background:var(--blue-d);border:1px solid rgba(59,111,255,.25);border-radius:100px;padding:4px 11px 4px 7px;}
+.q-class-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);}
+.q-class-pill-name{font-size:.74rem;font-weight:600;color:var(--blue);}
+.q-exit-btn{background:none;border:none;color:var(--slate2);font-size:.74rem;}
+.q-exit-btn:hover{color:var(--coral);}
+.q-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.arc-wrap{position:relative;width:52px;height:52px;}
+.arc-wrap svg{transform:rotate(-90deg);overflow:visible;}
+.arc-bg{fill:none;stroke:var(--card2);stroke-width:4;}
+.arc-fill{fill:none;stroke:url(#ag);stroke-width:4;stroke-linecap:round;stroke-dasharray:138.23;stroke-dashoffset:138.23;transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1);}
+.arc-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;}
+.cat-tag{font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);background:var(--blue-d);border:1px solid rgba(59,111,255,.22);padding:4px 11px;border-radius:100px;}
+.timer-strip{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+.timer-track{flex:1;height:3px;background:var(--card2);border-radius:2px;overflow:hidden;}
+.timer-fill{height:100%;border-radius:2px;transition:width 1s linear,background .5s;}
+.timer-num{font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--slate);width:22px;text-align:right;}
+.quiz-q{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(1rem,3vw,1.25rem);line-height:1.5;margin-bottom:18px;}
+.ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;}
+.ans-btn{background:var(--card2);border:1.5px solid transparent;border-radius:11px;padding:13px 14px;color:var(--white);font-size:.85rem;font-weight:500;line-height:1.4;text-align:left;transition:border-color .18s,transform .12s;position:relative;overflow:hidden;}
+.ans-btn::before{content:'';position:absolute;inset:0;background:var(--blue-d);opacity:0;transition:opacity .18s;}
+.ans-btn:hover:not(:disabled)::before{opacity:1;}
+.ans-btn:hover:not(:disabled){border-color:var(--blue);transform:translateY(-1px);}
+.ans-btn:disabled{cursor:default;}
+.ans-btn.correct{background:rgba(245,158,11,.1);border-color:var(--amber);color:var(--amber);}
+.ans-btn.wrong{background:rgba(239,68,68,.08);border-color:var(--coral);color:var(--coral);}
+.ans-btn.reveal{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2);color:rgba(238,242,255,.4);}
+.ans-lbl{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:rgba(123,144,176,.18);font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;margin-right:8px;flex-shrink:0;vertical-align:middle;}
+.ans-btn.correct .ans-lbl{background:var(--amber);color:var(--bg);}
+.ans-btn.wrong .ans-lbl{background:var(--coral);color:#fff;}
+.q-fb{min-height:34px;border-radius:9px;padding:8px 13px;font-size:.82rem;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(4px);transition:opacity .25s,transform .25s;margin-bottom:14px;}
+.q-fb.on{opacity:1;transform:none;}
+.q-fb.c{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.q-fb.w{background:rgba(239,68,68,.07);color:var(--coral);border:1px solid rgba(239,68,68,.3);}
+.next-q-btn{width:100%;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;border:none;border-radius:11px;padding:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .15s;box-shadow:0 4px 18px var(--blue-g);}
+.next-q-btn.on{opacity:1;pointer-events:auto;}
+.next-q-btn:hover{transform:translateY(-1px);}
+
+/* Form play */
+.form-play-field{margin-bottom:18px;}
+.form-play-field label{display:block;font-size:.88rem;font-weight:500;margin-bottom:8px;line-height:1.4;}
+.form-play-field .req{color:var(--coral);}
+.form-play-input{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--white);font-size:.88rem;outline:none;transition:border-color .18s;}
+.form-play-input:focus{border-color:var(--blue);}
+.form-play-textarea{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--white);font-size:.88rem;outline:none;resize:vertical;min-height:80px;transition:border-color .18s;}
+.form-play-textarea:focus{border-color:var(--blue);}
+.form-play-select{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--white);font-size:.88rem;outline:none;appearance:none;}
+.form-play-option{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:.85rem;}
+.form-play-option input{accent-color:var(--blue);width:15px;height:15px;}
+.submit-form-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;box-shadow:0 4px 16px rgba(16,185,129,.3);transition:transform .15s;}
+.submit-form-btn:hover{transform:translateY(-1px);}
+
+/* Score screen */
+.score-screen{text-align:center;padding:8px 0;}
+.sc-emoji{font-size:3rem;margin-bottom:12px;}
+.sc-headline{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.4rem,4vw,1.9rem);margin-bottom:6px;}
+.sc-sub{color:var(--slate);font-size:.88rem;margin-bottom:5px;}
+.sc-class{font-size:.75rem;color:var(--blue);margin-bottom:22px;}
+.sc-big{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2.5rem,10vw,4rem);background:linear-gradient(135deg,var(--blue),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px;}
+.sc-den{color:var(--slate);font-size:.9rem;margin-bottom:26px;}
+.sc-acts{display:flex;gap:10px;justify-content:center;}
+.sc-home{background:var(--card2);border:1px solid var(--border);color:var(--slate);font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;border-radius:10px;padding:11px 24px;}
+.sc-home:hover{color:var(--white);}
+.sc-again{background:transparent;border:1.5px solid var(--blue);color:var(--blue);font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;border-radius:10px;padding:11px 24px;transition:background .18s,color .18s;}
+.sc-again:hover{background:var(--blue);color:#fff;}
+
+/* Form submitted */
+.form-done{text-align:center;padding:28px 0;}
+.form-done-icon{font-size:3rem;margin-bottom:14px;}
+.form-done h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:8px;}
+.form-done p{color:var(--slate);font-size:.88rem;margin-bottom:24px;}
+
+/* Utils */
+.gap-8{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.mt-16{margin-top:16px;}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.msg-bar{border-radius:9px;padding:9px 13px;font-size:.8rem;font-weight:500;display:none;gap:7px;align-items:center;margin-top:10px;}
+.msg-bar.on{display:flex;}
+.msg-bar.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--coral);}
+.msg-bar.ok{background:var(--green-d);border:1px solid rgba(16,185,129,.3);color:var(--green);}
+@media(max-width:900px){.builder-layout{grid-template-columns:1fr;}.sidebar{width:180px;}.rt-head,.rt-row{grid-template-columns:2fr 1fr 1fr 70px;}.rt-head .rt-cell:nth-child(2),.rt-row .rt-cell:nth-child(2){display:none;}}
+@media(max-width:640px){.sidebar{display:none;}.main{width:100%;}.grid-3{grid-template-columns:1fr 1fr;}.ans-grid{grid-template-columns:1fr;}.page{padding:18px;}}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH: ROLE ══ -->
+<div class="auth-screen active" id="authRole">
+  <div class="nova-logo"><div class="nova-star">✦</div><div class="nova-wm"><em>Nova</em></div></div>
+  <div class="auth-card">
+    <h2>Welcome to Nova</h2>
+    <p>Smart quizzing &amp; forms for classrooms</p>
+    <div class="role-grid">
+      <button class="role-btn t" id="goTeacher"><span class="ri">👩‍🏫</span><span class="rl">Teacher</span><span class="rd">Build tests, track results</span></button>
+      <button class="role-btn s" id="goStudent"><span class="ri">🎓</span><span class="rd">Join a class &amp; take quizzes</span><span class="rl">Student</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUTH: TEACHER ══ -->
+<div class="auth-screen" id="authTeacher">
+  <div class="nova-logo"><div class="nova-star">✦</div><div class="nova-wm"><em>Nova</em></div></div>
+  <div class="auth-card">
+    <button class="back-link" id="btBack">← Back</button>
+    <h2>Teacher Portal</h2><p>Sign in or create your account</p>
+    <div class="a-tabs">
+      <button class="a-tab t-on on" data-f="tl">Sign In</button>
+      <button class="a-tab" data-f="tr">Register</button>
+    </div>
+    <div class="a-form on" id="tl">
+      <div class="f"><label>Email</label><input type="email" id="tl-e" placeholder="teacher@school.edu"></div>
+      <div class="f"><label>Password</label><input type="password" id="tl-p" placeholder="Your password"></div>
+      <button class="sub-btn t" id="tl-go">Sign In →</button>
+      <div class="a-msg err" id="tl-msg"></div>
+    </div>
+    <div class="a-form" id="tr">
+      <div class="f-row"><div class="f"><label>First name</label><input type="text" id="tr-fn" placeholder="Jane"></div><div class="f"><label>Last name</label><input type="text" id="tr-ln" placeholder="Smith"></div></div>
+      <div class="f"><label>Email</label><input type="email" id="tr-e" placeholder="teacher@school.edu"></div>
+      <div class="f"><label>School</label><input type="text" id="tr-sc" placeholder="Springfield High"></div>
+      <div class="f"><label>Password</label><input type="password" id="tr-p" placeholder="Min. 6 chars"><div class="pw-bar-wrap"><div class="pw-bar" id="tr-bar"></div></div></div>
+      <div class="f"><label>Confirm</label><input type="password" id="tr-p2" placeholder="Re-enter"></div>
+      <button class="sub-btn t" id="tr-go">Create Account</button>
+      <div class="a-msg" id="tr-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUTH: STUDENT ══ -->
+<div class="auth-screen" id="authStudent">
+  <div class="nova-logo"><div class="nova-star">✦</div><div class="nova-wm"><em>Nova</em></div></div>
+  <div class="auth-card">
+    <button class="back-link" id="bsBack">← Back</button>
+    <h2>Student Portal</h2><p>Sign in or register</p>
+    <div class="a-tabs">
+      <button class="a-tab s-on on" data-f="sl">Sign In</button>
+      <button class="a-tab" data-f="sr">Register</button>
+    </div>
+    <div class="a-form on" id="sl">
+      <div class="f"><label>Email</label><input type="email" id="sl-e" placeholder="student@school.edu"></div>
+      <div class="f"><label>Password</label><input type="password" id="sl-p" placeholder="Your password"></div>
+      <button class="sub-btn s" id="sl-go">Sign In →</button>
+      <div class="a-msg err" id="sl-msg"></div>
+    </div>
+    <div class="a-form" id="sr">
+      <div class="f-row"><div class="f"><label>First name</label><input type="text" id="sr-fn" placeholder="Alex"></div><div class="f"><label>Last name</label><input type="text" id="sr-ln" placeholder="Johnson"></div></div>
+      <div class="f"><label>Email</label><input type="email" id="sr-e" placeholder="student@school.edu"></div>
+      <div class="f"><label>Student ID</label><input type="text" id="sr-id" placeholder="STU-2024-001"></div>
+      <div class="f"><label>Password</label><input type="password" id="sr-p" placeholder="Min. 6 chars"><div class="pw-bar-wrap"><div class="pw-bar" id="sr-bar"></div></div></div>
+      <div class="f"><label>Confirm</label><input type="password" id="sr-p2" placeholder="Re-enter"></div>
+      <button class="sub-btn s" id="sr-go">Create Account</button>
+      <div class="a-msg" id="sr-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACHER APP ══ -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sb-logo"><div class="sb-star">✦</div><div class="sb-wm"><em>Nova</em></div></div>
+    <div class="sb-user"><div class="sb-avatar" id="sbAvatar">T</div><div><div class="sb-uname" id="sbName">Teacher</div><div class="sb-urole">Educator</div></div></div>
+    <nav class="sb-nav">
+      <div class="sb-section">Main</div>
+      <button class="nav-item active" data-page="pgOverview"><span class="ni">🏠</span>Overview</button>
+      <button class="nav-item" data-page="pgTests"><span class="ni">📋</span>My Tests</button>
+      <button class="nav-item" data-page="pgForms"><span class="ni">📝</span>Form Builder</button>
+      <div class="sb-section">Class</div>
+      <button class="nav-item" data-page="pgClasses"><span class="ni">🏫</span>Classrooms</button>
+      <button class="nav-item" data-page="pgResults"><span class="ni">📊</span>Results</button>
+    </nav>
+    <div class="sb-bottom"><button class="signout-btn" id="teacherSignout">Sign out</button></div>
+  </aside>
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="pgOverview">
+      <div class="page-header">
+        <div><div class="page-title" id="ovTitle">Good morning! 👋</div><div class="page-sub">Here's your classroom at a glance</div></div>
+        <button class="btn-primary" onclick="nav('pgTests')">＋ New Test</button>
+      </div>
+      <div class="grid-3">
+        <div class="card stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="ovTests">0</div><div class="stat-lbl">Total Tests</div></div>
+        <div class="card stat-card"><div class="stat-icon">🏫</div><div class="stat-num" id="ovClasses">0</div><div class="stat-lbl">Classrooms</div></div>
+        <div class="card stat-card"><div class="stat-icon">🎓</div><div class="stat-num" id="ovStudents">0</div><div class="stat-lbl">Students</div></div>
+      </div>
+      <div class="sec-title">Active Tests</div>
+      <div id="ovActiveTests"></div>
+      <div class="sec-title mt-16">Recent Results</div>
+      <div id="ovRecentResults"></div>
+    </div>
+
+    <!-- MY TESTS -->
+    <div class="page" id="pgTests">
+      <div class="page-header">
+        <div><div class="page-title">My Tests</div><div class="page-sub">Create and manage quizzes &amp; assignments</div></div>
+        <div class="gap-8">
+          <button class="btn-secondary btn-sm" id="openFormBuilderBtn">📝 New Form</button>
+          <button class="btn-primary btn-sm" id="openQuizBuilderBtn">＋ New Quiz</button>
+        </div>
+      </div>
+      <div class="test-grid" id="testGrid"></div>
+    </div>
+
+    <!-- QUIZ BUILDER (inside pgTests, toggleable) -->
+    <div class="page" id="pgQuizBuilder">
+      <div class="page-header">
+        <div><div class="page-title" id="qbTitle">Quiz Builder</div><div class="page-sub">Add questions manually or bulk import</div></div>
+        <div class="gap-8">
+          <button class="btn-secondary btn-sm" id="cancelQB">✕ Cancel</button>
+          <button class="btn-primary btn-sm" id="saveQB">💾 Save Quiz</button>
+        </div>
+      </div>
+      <div class="builder-layout">
+        <div>
+          <div class="builder-meta">
+            <h3>Quiz Details</h3>
+            <label class="b-label">Quiz title</label>
+            <input class="b-input" id="qb-title" placeholder="e.g. Chapter 5 Science Quiz">
+            <label class="b-label">Assign to classroom</label>
+            <select class="b-select" id="qb-class"><option value="">— Select classroom —</option></select>
+            <label class="b-label">Time limit per question (seconds)</label>
+            <input class="b-input" id="qb-time" type="number" value="15" min="5" max="120">
+          </div>
+          <div class="sec-title">Questions (<span id="qCountLbl">0</span>)</div>
+          <div class="q-list" id="qList"></div>
+          <div class="empty-qs" id="qEmpty"><span>❓</span>No questions yet — add some from the panel →</div>
+
+          <!-- Bulk Import -->
+          <div class="builder-meta mt-16">
+            <h3>⚡ Bulk Import</h3>
+            <p style="color:var(--slate);font-size:.78rem;margin-bottom:10px;">Paste questions in this format, one per block:</p>
+            <div class="bulk-box">
+              <textarea id="bulkText" placeholder="What is the capital of France?&#10;*Paris&#10;London&#10;Berlin&#10;Madrid&#10;&#10;How many planets are in our solar system?&#10;*8&#10;7&#10;9&#10;10"></textarea>
+            </div>
+            <div class="bulk-hint">Format: Question on first line. Options below it. Mark correct answer with * prefix. Separate questions with a blank line.</div>
+            <button class="btn-secondary btn-sm mt-16" id="bulkImportBtn">⚡ Import Questions</button>
+            <div class="msg-bar" id="bulkMsg"></div>
+          </div>
+        </div>
+        <div>
+          <div class="add-q-panel">
+            <h3>Add Question</h3>
+            <div class="q-type-tabs">
+              <button class="q-type-tab on" data-qt="mcq">Multiple Choice</button>
+              <button class="q-type-tab" data-qt="tf">True / False</button>
+            </div>
+            <div id="mcqFields">
+              <label class="b-label">Question</label>
+              <textarea class="b-input" id="aq-text" rows="3" placeholder="Type your question here…" style="resize:vertical;"></textarea>
+              <label class="b-label">Answer options <span style="color:var(--slate);font-weight:400;">(mark correct with ●)</span></label>
+              <div class="option-list" id="optList"></div>
+              <button class="add-opt-btn" id="addOptBtn">＋ Add option</button>
+              <p class="correct-hint">Click the ● radio to mark the correct answer</p>
+            </div>
+            <div id="tfFields" style="display:none;">
+              <label class="b-label">Statement</label>
+              <textarea class="b-input" id="tf-text" rows="3" placeholder="Type a true/false statement…" style="resize:vertical;"></textarea>
+              <label class="b-label">Correct answer</label>
+              <select class="b-select" id="tf-ans"><option value="true">True ✓</option><option value="false">False ✗</option></select>
+            </div>
+            <button class="btn-primary" style="width:100%;justify-content:center;" id="addQBtn">Add Question</button>
+            <div class="msg-bar" id="aqMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM BUILDER -->
+    <div class="page" id="pgForms">
+      <div class="page-header">
+        <div><div class="page-title" id="fbTitle">Form Builder</div><div class="page-sub">Create forms like Google Forms — any field type</div></div>
+        <div class="gap-8">
+          <button class="btn-secondary btn-sm" id="cancelFB">✕ Cancel</button>
+          <button class="btn-primary btn-sm" id="saveFB">💾 Save Form</button>
+        </div>
+      </div>
+      <div class="builder-meta" style="margin-bottom:18px;">
+        <h3>Form Details</h3>
+        <label class="b-label">Form title</label>
+        <input class="b-input" id="fb-title" placeholder="e.g. Student Feedback Form">
+        <label class="b-label">Description (optional)</label>
+        <input class="b-input" id="fb-desc" placeholder="Brief description…">
+        <label class="b-label">Assign to classroom</label>
+        <select class="b-select" id="fb-class"><option value="">— Select classroom —</option></select>
+      </div>
+      <div class="sec-title">Add Fields</div>
+      <div class="add-field-bar">
+        <button class="add-field-btn" data-ft="short">✏️ Short Text</button>
+        <button class="add-field-btn" data-ft="para">📄 Paragraph</button>
+        <button class="add-field-btn" data-ft="mcq">⭕ Multiple Choice</button>
+        <button class="add-field-btn" data-ft="check">☑️ Checkboxes</button>
+        <button class="add-field-btn" data-ft="drop">▾ Dropdown</button>
+        <button class="add-field-btn" data-ft="scale">⭐ Rating Scale</button>
+      </div>
+      <div class="form-canvas" id="formCanvas"></div>
+      <div class="empty-qs" id="formEmpty" style="margin-bottom:18px;"><span>📝</span>No fields yet — add some above!</div>
+      <div class="msg-bar" id="fbMsg"></div>
+    </div>
+
+    <!-- CLASSROOMS -->
+    <div class="page" id="pgClasses">
+      <div class="page-header">
+        <div><div class="page-title">Classrooms</div><div class="page-sub">Manage your classes and share codes</div></div>
+      </div>
+      <div class="create-class-box">
+        <h3>✦ Create a Classroom</h3>
+        <label class="b-label">Classroom name</label>
+        <input class="b-input" id="cc-name" placeholder="e.g. Grade 10 Science — Period 3">
+        <label class="b-label" style="margin-top:8px;">Subject</label>
+        <div class="chip-wrap" id="chipWrap">
+          <div class="chip" data-s="Science">🔬 Science</div>
+          <div class="chip" data-s="Math">📐 Math</div>
+          <div class="chip" data-s="History">📜 History</div>
+          <div class="chip" data-s="English">📖 English</div>
+          <div class="chip" data-s="Geography">🌍 Geography</div>
+          <div class="chip" data-s="Music">🎵 Music</div>
+          <div class="chip" data-s="General">📚 General</div>
+        </div>
+        <button class="btn-primary btn-sm mt-16" id="createClassBtn">Generate Classroom Code</button>
+        <div class="msg-bar" id="ccMsg"></div>
+      </div>
+      <div class="sec-title">Your Classrooms</div>
+      <div class="class-grid" id="classGrid"></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="page" id="pgResults">
+      <div class="page-header">
+        <div><div class="page-title">Results</div><div class="page-sub">Student scores across all your tests</div></div>
+      </div>
+      <div class="results-filter" id="resultsFilter"></div>
+      <div class="results-table">
+        <div class="rt-head">
+          <div class="rt-cell">Student</div>
+          <div class="rt-cell">Test</div>
+          <div class="rt-cell">Score</div>
+          <div class="rt-cell">Progress</div>
+          <div class="rt-cell">Status</div>
+        </div>
+        <div id="resultsBody"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ STUDENT APP ══ -->
+<div class="student-app" id="studentApp">
+  <div class="s-topbar">
+    <div class="nova-logo" style="margin-bottom:0;"><div class="nova-star" style="width:30px;height:30px;font-size:.9rem;">✦</div><div class="nova-wm" style="font-size:1.2rem;"><em>Nova</em></div></div>
+    <div class="gap-8">
+      <div class="s-user-pill"><div class="s-avatar" id="sAvatar">A</div><div class="s-uname" id="sName">Student</div></div>
+      <button class="s-signout" id="studentSignout">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Join screen -->
+  <div class="s-card" id="sJoin" style="display:block;">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:4px;">Join a Classroom</div>
+    <div style="color:var(--slate);font-size:.82rem;margin-bottom:20px;">Enter the code your teacher shared</div>
+    <div class="join-code-wrap">
+      <h3>🔑 Enter Class Code</h3>
+      <p>6-character code from your teacher's dashboard</p>
+      <div class="code-row">
+        <input class="code-inp" id="codeInp" maxlength="6" placeholder="e.g. AB3X7K" autocomplete="off" spellcheck="false">
+        <button class="lookup-btn" id="lookupBtn">Find →</button>
+      </div>
+      <div class="join-msg" id="joinMsg"></div>
+    </div>
+    <div class="found-card" id="foundCard">
+      <div class="found-accent" id="foundAccent"></div>
+      <div class="found-body">
+        <div class="found-name" id="foundName">—</div>
+        <div class="found-detail" id="foundSubject">—</div>
+        <div class="found-detail" id="foundTeacher">—</div>
+        <div id="foundTestsList" style="margin-top:10px;display:flex;flex-direction:column;gap:7px;"></div>
+      </div>
+    </div>
+    <button class="start-btn" id="startTestBtn">Start →</button>
+  </div>
+
+  <!-- Quiz play -->
+  <div class="s-card" id="sQuiz" style="display:none;">
+    <div class="progress-track"><div class="progress-fill" id="qProgressFill" style="width:0%"></div></div>
+    <div class="q-topbar">
+      <div class="q-class-pill"><div class="q-class-pill-dot" id="qDot"></div><div class="q-class-pill-name" id="qClassName">—</div></div>
+      <button class="q-exit-btn" id="qExitBtn">✕ Exit</button>
+    </div>
+    <div class="q-meta">
+      <div class="arc-wrap">
+        <svg width="52" height="52" viewBox="0 0 52 52"><defs><linearGradient id="ag" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3B6FFF"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs><circle class="arc-bg" cx="26" cy="26" r="22"/><circle class="arc-fill" id="arcFill" cx="26" cy="26" r="22"/></svg>
+        <div class="arc-label" id="arcLabel">1/10</div>
+      </div>
+      <div class="cat-tag" id="catTag">—</div>
+    </div>
+    <div class="timer-strip"><div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div><div class="timer-num" id="timerNum">15</div></div>
+    <div class="quiz-q" id="quizQ">—</div>
+    <div class="ans-grid" id="ansGrid"></div>
+    <div class="q-fb" id="qFb"><span id="qFbIcon"></span><span id="qFbText"></span></div>
+    <button class="next-q-btn" id="nextQBtn">Next →</button>
+  </div>
+
+  <!-- Form play -->
+  <div class="s-card" id="sForm" style="display:none;">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:4px;" id="formPlayTitle">Form</div>
+    <div style="color:var(--slate);font-size:.8rem;margin-bottom:20px;" id="formPlayDesc"></div>
+    <div id="formPlayFields"></div>
+    <button class="submit-form-btn" id="submitFormBtn">Submit Response</button>
+    <div class="msg-bar" id="formPlayMsg"></div>
+  </div>
+
+  <!-- Score -->
+  <div class="s-card" id="sScore" style="display:none;">
+    <div class="score-screen">
+      <div class="sc-emoji" id="scEmoji">🏆</div>
+      <div class="sc-headline" id="scHeadline">Brilliant!</div>
+      <div class="sc-sub" id="scSub">Well done!</div>
+      <div class="sc-class" id="scClass"></div>
+      <div class="sc-big" id="scBig">0</div>
+      <div class="sc-den" id="scDen">out of 10 correct</div>
+      <div class="sc-acts">
+        <button class="sc-home" id="scHome">Home</button>
+        <button class="sc-again" id="scAgain">Play again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form done -->
+  <div class="s-card" id="sFormDone" style="display:none;">
+    <div class="form-done">
+      <div class="form-done-icon">✅</div>
+      <h2>Response Submitted!</h2>
+      <p>Your response has been recorded. Thank you!</p>
+      <button class="btn-primary" style="margin:0 auto;" id="formDoneHome">Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ STORAGE ══
+const DB={
+  g:(k,d)=>{try{const v=localStorage.getItem(k);return v!=null?JSON.parse(v):d;}catch{return d;}},
+  s:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+const gT=()=>DB.g('nova_t',{});
+const gS=()=>DB.g('nova_s',{});
+const gC=()=>DB.g('nova_c',[]);
+const gTests=()=>DB.g('nova_tests',[]);
+const gRes=()=>DB.g('nova_res',[]);
+const sT=v=>DB.s('nova_t',v);
+const sS=v=>DB.s('nova_s',v);
+const sC=v=>DB.s('nova_c',v);
+const sTests=v=>DB.s('nova_tests',v);
+const sRes=v=>DB.s('nova_res',v);
+
+const SUBJ_C={Science:'#3B6FFF',Math:'#7C3AED',History:'#F59E0B',English:'#EC4899',Geography:'#10B981',Music:'#F97316',General:'#7B90B0'};
+
+function genCode(){
+  const ch='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c='';for(let i=0;i<6;i++)c+=ch[Math.floor(Math.random()*ch.length)];
+  return gC().some(x=>x.code===c)?genCode():c;
+}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+// ══ HELPERS ══
+const $=id=>document.getElementById(id);
+function showAuth(id){document.querySelectorAll('.auth-screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');}
+function showApp(role){
+  document.querySelectorAll('.auth-screen').forEach(s=>s.classList.remove('active'));
+  if(role==='teacher'){$('app').classList.add('active');$('studentApp').classList.remove('active');}
+  else{$('app').classList.remove('active');$('studentApp').classList.add('active');}
+}
+function nav(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(pageId).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{n.classList.toggle('active',n.dataset.page===pageId);});
+}
+function pwStr(val,barEl){let s=0;if(val.length>=6)s++;if(val.length>=10)s++;if(/[A-Z]/.test(val))s++;if(/[0-9]/.test(val))s++;if(/[^A-Za-z0-9]/.test(val))s++;barEl.style.width=Math.min(s*20,100)+'%';barEl.style.background=s<=1?'#EF4444':s<=3?'#F59E0B':'#10B981';}
+function msg(id,text,type='err'){const e=$(id);e.textContent=text;e.className='msg-bar '+type+' on';if(type==='ok')setTimeout(()=>e.className='msg-bar',3000);}
+function clearMsg(id){$(id).className='msg-bar';}
+function aMsg(id,text,type='err'){const e=$(id);e.textContent=text;e.className='a-msg '+type+' on';}
+
+// ══ AUTH TABS ══
+document.querySelectorAll('.a-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const card=tab.closest('.auth-card');
+    const isT=card.closest('#authTeacher')!=null;
+    card.querySelectorAll('.a-tab').forEach(t=>{t.classList.remove('on','t-on','s-on');});
+    card.querySelectorAll('.a-form').forEach(f=>f.classList.remove('on'));
+    tab.classList.add('on',isT?'t-on':'s-on');
+    $(tab.dataset.f).classList.add('on');
+  });
+});
+
+// ══ STATE ══
+let CU=null, CR=''; // current user, current role
+
+// ══ ROLE SELECT ══
+$('goTeacher').addEventListener('click',()=>showAuth('authTeacher'));
+$('goStudent').addEventListener('click',()=>showAuth('authStudent'));
+$('btBack').addEventListener('click',()=>showAuth('authRole'));
+$('bsBack').addEventListener('click',()=>showAuth('authRole'));
+
+// ══ TEACHER AUTH ══
+$('tr-p').addEventListener('input',()=>pwStr($('tr-p').value,$('tr-bar')));
+$('tl-go').addEventListener('click',()=>{
+  const e=$('tl-e').value.trim().toLowerCase(),p=$('tl-p').value;
+  if(!e||!p){aMsg('tl-msg','Fill in all fields.');return;}
+  const t=gT()[e];
+  if(!t){aMsg('tl-msg','No account found.');return;}
+  if(t.p!==p){aMsg('tl-msg','Incorrect password.');return;}
+  CU=t;CR='teacher';initTeacher();
+});
+$('tl-p').addEventListener('keydown',e=>{if(e.key==='Enter')$('tl-go').click();});
+$('tr-go').addEventListener('click',()=>{
+  const fn=$('tr-fn').value.trim(),ln=$('tr-ln').value.trim(),
+        e=$('tr-e').value.trim().toLowerCase(),sc=$('tr-sc').value.trim(),
+        p=$('tr-p').value,p2=$('tr-p2').value;
+  if(!fn||!ln||!e||!p){aMsg('tr-msg','Fill in all fields.');return;}
+  if(p.length<6){aMsg('tr-msg','Password min 6 chars.');return;}
+  if(p!==p2){aMsg('tr-msg','Passwords do not match.');return;}
+  const ts=gT();
+  if(ts[e]){aMsg('tr-msg','Account already exists.');return;}
+  const u={fn,ln,e,sc,p};ts[e]=u;sT(ts);
+  aMsg('tr-msg','Account created! Loading…','ok');
+  setTimeout(()=>{CU=u;CR='teacher';initTeacher();},800);
+});
+
+// ══ STUDENT AUTH ══
+$('sr-p').addEventListener('input',()=>pwStr($('sr-p').value,$('sr-bar')));
+$('sl-go').addEventListener('click',()=>{
+  const e=$('sl-e').value.trim().toLowerCase(),p=$('sl-p').value;
+  if(!e||!p){aMsg('sl-msg','Fill in all fields.');return;}
+  const s=gS()[e];
+  if(!s){aMsg('sl-msg','No account found.');return;}
+  if(s.p!==p){aMsg('sl-msg','Incorrect password.');return;}
+  CU=s;CR='student';initStudent();
+});
+$('sl-p').addEventListener('keydown',e=>{if(e.key==='Enter')$('sl-go').click();});
+$('sr-go').addEventListener('click',()=>{
+  const fn=$('sr-fn').value.trim(),ln=$('sr-ln').value.trim(),
+        e=$('sr-e').value.trim().toLowerCase(),id=$('sr-id').value.trim(),
+        p=$('sr-p').value,p2=$('sr-p2').value;
+  if(!fn||!ln||!e||!id||!p){aMsg('sr-msg','Fill in all fields.');return;}
+  if(p.length<6){aMsg('sr-msg','Password min 6 chars.');return;}
+  if(p!==p2){aMsg('sr-msg','Passwords do not match.');return;}
+  const ss=gS();
+  if(ss[e]){aMsg('sr-msg','Account already exists.');return;}
+  const u={fn,ln,e,id,p,joined:[]};ss[e]=u;sS(ss);
+  aMsg('sr-msg','Account created!','ok');
+  setTimeout(()=>{CU=u;CR='student';initStudent();},800);
+});
+
+// ══ TEACHER INIT ══
+function initTeacher(){
+  $('sbAvatar').textContent=CU.fn[0].toUpperCase();
+  $('sbName').textContent=CU.fn+' '+CU.ln;
+  showApp('teacher');
+  populateClassSelects();
+  renderOverview();
+  renderTestGrid();
+  renderClassGrid();
+  renderResults();
+}
+$('teacherSignout').addEventListener('click',()=>{CU=null;CR='';$('app').classList.remove('active');showAuth('authRole');});
+
+// ══ NAV ══
+document.querySelectorAll('.nav-item').forEach(btn=>{
+  btn.addEventListener('click',()=>nav(btn.dataset.page));
+});
+$('openQuizBuilderBtn').addEventListener('click',()=>{openQuizBuilder();});
+$('openFormBuilderBtn').addEventListener('click',()=>{openFormBuilder();});
+
+// ══ OVERVIEW ══
+function renderOverview(){
+  const hour=new Date().getHours();
+  const greet=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  $('ovTitle').textContent=(hour<12?'Good morning':hour<17?'Good afternoon':'Good evening')+', '+CU.fn+'! 👋';
+  const myTests=gTests().filter(t=>t.owner===CU.e);
+  const myClasses=gC().filter(c=>c.owner===CU.e);
+  const myStudents=[...new Set(myClasses.flatMap(c=>c.students||[]))];
+  $('ovTests').textContent=myTests.length;
+  $('ovClasses').textContent=myClasses.length;
+  $('ovStudents').textContent=myStudents.length;
+  // active tests
+  const active=myTests.filter(t=>t.active);
+  $('ovActiveTests').innerHTML=active.length
+    ?active.map(t=>`<div class="card" style="padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;"><div><div style="font-weight:600;font-size:.88rem;">${t.title}</div><div style="color:var(--slate);font-size:.74rem;margin-top:3px;">${t.type==='quiz'?'Quiz':'Form'} · ${t.qCount||0} questions</div></div><span class="status-pill done">Active</span></div>`).join('')
+    :'<div style="color:var(--slate);font-size:.82rem;padding:10px 0;">No active tests. Go to My Tests to activate one.</div>';
+  // recent results
+  const myClassCodes=myClasses.map(c=>c.code);
+  const recent=gRes().filter(r=>myClassCodes.includes(r.classCode)).slice(-5).reverse();
+  $('ovRecentResults').innerHTML=recent.length
+    ?recent.map(r=>`<div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;"><div><div style="font-weight:500;font-size:.86rem;">${r.studentName}</div><div style="color:var(--slate);font-size:.73rem;">${r.testTitle||'Quiz'}</div></div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:var(--amber);">${r.score!=null?r.score+'/'+r.total:'Pending'}</div></div>`).join('')
+    :'<div style="color:var(--slate);font-size:.82rem;padding:10px 0;">No results yet.</div>';
+}
+
+// ══ TEST GRID ══
+function renderTestGrid(){
+  const myTests=gTests().filter(t=>t.owner===CU.e);
+  const grid=$('testGrid');
+  if(!myTests.length){grid.innerHTML='<div class="empty-qs" style="grid-column:1/-1;"><span>📋</span>No tests yet. Create a quiz or form above!</div>';return;}
+  grid.innerHTML=myTests.map(t=>`
+    <div class="card test-card">
+      <div class="test-accent" style="background:${t.type==='quiz'?'linear-gradient(90deg,var(--blue),var(--violet))':'linear-gradient(90deg,#7C3AED,#EC4899)'}"></div>
+      <div class="test-card-head">
+        <div class="test-title">${t.title}</div>
+        <span class="test-type-badge ${t.type}">${t.type==='quiz'?'Quiz':'Form'}</span>
+      </div>
+      <div class="test-meta">
+        <span>❓ ${t.qCount||0} questions</span>
+        <span>🏫 ${t.classCode?t.classCode:'Unassigned'}</span>
+      </div>
+      <div class="test-footer">
+        <div class="toggle-wrap">
+          <label class="toggle"><input type="checkbox" ${t.active?'checked':''} data-tid="${t.id}" class="test-toggle"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          <span class="toggle-lbl">${t.active?'Active':'Inactive'}</span>
+        </div>
+        <div class="test-actions">
+          <button class="icon-btn del" data-tid="${t.id}" title="Delete">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.test-toggle').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      const tests=gTests();const t=tests.find(x=>x.id===cb.dataset.tid);
+      if(t){t.active=cb.checked;sTests(tests);}
+      renderTestGrid();renderOverview();
+    });
+  });
+  grid.querySelectorAll('.icon-btn.del').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(!confirm('Delete this test?'))return;
+      sTests(gTests().filter(t=>t.id!==btn.dataset.tid));
+      renderTestGrid();renderOverview();
+    });
+  });
+}
+
+// ══ QUIZ BUILDER ══
+let qbQuestions=[], qbEditId=null, qCurrentType='mcq';
+let qbOptions=[{text:'',correct:true},{text:'',correct:false},{text:'',correct:false},{text:'',correct:false}];
+
+function openQuizBuilder(editId=null){
+  qbEditId=editId;
+  if(editId){
+    const t=gTests().find(x=>x.id===editId);
+    if(t){$('qb-title').value=t.title;$('qb-class').value=t.classCode||'';$('qb-time').value=t.timeLimit||15;qbQuestions=[...t.questions];}
+  } else {
+    $('qb-title').value='';$('qb-class').value='';$('qb-time').value=15;qbQuestions=[];
+  }
+  $('bulkText').value='';clearMsg('bulkMsg');clearMsg('aqMsg');
+  resetOptionList();renderQList();nav('pgQuizBuilder');
+}
+$('cancelQB').addEventListener('click',()=>nav('pgTests'));
+$('saveQB').addEventListener('click',()=>{
+  const title=$('qb-title').value.trim();
+  if(!title){msg('aqMsg','Please enter a quiz title.');return;}
+  if(!qbQuestions.length){msg('aqMsg','Add at least one question.','err');return;}
+  const tests=gTests();
+  if(qbEditId){
+    const t=tests.find(x=>x.id===qbEditId);
+    if(t){t.title=title;t.classCode=$('qb-class').value;t.timeLimit=parseInt($('qb-time').value)||15;t.questions=qbQuestions;t.qCount=qbQuestions.length;}
+  } else {
+    tests.push({id:genId(),owner:CU.e,type:'quiz',title,classCode:$('qb-class').value,timeLimit:parseInt($('qb-time').value)||15,questions:qbQuestions,qCount:qbQuestions.length,active:false,created:Date.now()});
+  }
+  sTests(tests);renderTestGrid();renderOverview();nav('pgTests');
+});
+
+// Q type tabs
+document.querySelectorAll('.q-type-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.q-type-tab').forEach(t=>t.classList.remove('on'));
+    tab.classList.add('on');
+    qCurrentType=tab.dataset.qt;
+    $('mcqFields').style.display=qCurrentType==='mcq'?'block':'none';
+    $('tfFields').style.display=qCurrentType==='tf'?'block':'none';
+  });
+});
+
+// Options
+function resetOptionList(){qbOptions=[{text:'',correct:true},{text:'',correct:false},{text:'',correct:false},{text:'',correct:false}];renderOptionList();}
+function renderOptionList(){
+  const list=$('optList');
+  list.innerHTML=qbOptions.map((o,i)=>`
+    <div class="option-row">
+      <input type="radio" class="opt-radio" name="correctOpt" ${o.correct?'checked':''} data-oi="${i}">
+      <input class="opt-input" type="text" value="${o.text}" placeholder="Option ${String.fromCharCode(65+i)}" data-oi="${i}">
+      ${qbOptions.length>2?`<button class="opt-del" data-oi="${i}">✕</button>`:''}
+    </div>
+  `).join('');
+  list.querySelectorAll('.opt-radio').forEach(r=>r.addEventListener('change',()=>{qbOptions.forEach((o,i)=>o.correct=i===parseInt(r.dataset.oi));}));
+  list.querySelectorAll('.opt-input').forEach(inp=>inp.addEventListener('input',()=>{qbOptions[parseInt(inp.dataset.oi)].text=inp.value;}));
+  list.querySelectorAll('.opt-del').forEach(btn=>btn.addEventListener('click',()=>{qbOptions.splice(parseInt(btn.dataset.oi),1);renderOptionList();}));
+}
+$('addOptBtn').addEventListener('click',()=>{if(qbOptions.length<6){qbOptions.push({text:'',correct:false});renderOptionList();}});
+renderOptionList();
+
+$('addQBtn').addEventListener('click',()=>{
+  clearMsg('aqMsg');
+  if(qCurrentType==='mcq'){
+    const text=$('aq-text').value.trim();
+    if(!text){msg('aqMsg','Enter a question.');return;}
+    if(qbOptions.some(o=>!o.text.trim())){msg('aqMsg','Fill in all options.');return;}
+    if(!qbOptions.some(o=>o.correct)){msg('aqMsg','Mark a correct answer.');return;}
+    qbQuestions.push({id:genId(),type:'mcq',text,options:qbOptions.map(o=>({...o}))});
+    $('aq-text').value='';resetOptionList();
+  } else {
+    const text=$('tf-text').value.trim();
+    if(!text){msg('aqMsg','Enter a statement.');return;}
+    const ans=$('tf-ans').value==='true';
+    qbQuestions.push({id:genId(),type:'tf',text,options:[{text:'True',correct:ans},{text:'False',correct:!ans}]});
+    $('tf-text').value='';
+  }
+  renderQList();
+});
+
+function renderQList(){
+  $('qCountLbl').textContent=qbQuestions.length;
+  $('qEmpty').style.display=qbQuestions.length?'none':'block';
+  const list=$('qList');
+  list.innerHTML=qbQuestions.map((q,i)=>`
+    <div class="q-item">
+      <button class="q-item-del" data-qi="${i}">✕</button>
+      <div class="q-item-head">
+        <span class="q-num">Q${i+1}</span>
+        <span class="q-type-lbl">${q.type==='mcq'?'Multiple Choice':'True/False'}</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-options">
+        ${q.options.map(o=>`<div class="q-opt ${o.correct?'correct':'wrong'}"><span class="oi">${o.correct?'✓':'○'}</span>${o.text}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.q-item-del').forEach(btn=>{
+    btn.addEventListener('click',()=>{qbQuestions.splice(parseInt(btn.dataset.qi),1);renderQList();});
+  });
+}
+
+// Bulk import
+$('bulkImportBtn').addEventListener('click',()=>{
+  clearMsg('bulkMsg');
+  const raw=$('bulkText').value.trim();
+  if(!raw){msg('bulkMsg','Paste some questions first.','err');return;}
+  const blocks=raw.split(/\n\s*\n/).filter(b=>b.trim());
+  let count=0;
+  blocks.forEach(block=>{
+    const lines=block.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+    if(lines.length<3)return;
+    const qText=lines[0];
+    const opts=lines.slice(1).map(l=>({text:l.startsWith('*')?l.slice(1).trim():l,correct:l.startsWith('*')}));
+    if(!opts.some(o=>o.correct))opts[0].correct=true;
+    qbQuestions.push({id:genId(),type:'mcq',text:qText,options:opts});
+    count++;
+  });
+  if(count){msg('bulkMsg',`✓ Imported ${count} question${count>1?'s':''}!`,'ok');renderQList();$('bulkText').value='';}
+  else msg('bulkMsg','Could not parse questions. Check the format.','err');
+});
+
+// ══ FORM BUILDER ══
+let fbFields=[], fbEditId=null;
+
+function openFormBuilder(editId=null){
+  fbEditId=editId;
+  if(editId){
+    const t=gTests().find(x=>x.id===editId);
+    if(t){$('fb-title').value=t.title;$('fb-desc').value=t.desc||'';$('fb-class').value=t.classCode||'';fbFields=[...t.fields];}
+  } else {
+    $('fb-title').value='';$('fb-desc').value='';$('fb-class').value='';fbFields=[];
+  }
+  clearMsg('fbMsg');renderFormCanvas();nav('pgForms');
+}
+$('cancelFB').addEventListener('click',()=>nav('pgTests'));
+$('saveFB').addEventListener('click',()=>{
+  const title=$('fb-title').value.trim();
+  if(!title){msg('fbMsg','Enter a form title.');return;}
+  if(!fbFields.length){msg('fbMsg','Add at least one field.');return;}
+  const tests=gTests();
+  const fObj={id:fbEditId||genId(),owner:CU.e,type:'form',title,desc:$('fb-desc').value.trim(),classCode:$('fb-class').value,fields:fbFields,qCount:fbFields.length,active:false,created:Date.now()};
+  if(fbEditId){const idx=tests.findIndex(x=>x.id===fbEditId);if(idx>-1)tests[idx]=fObj;}
+  else tests.push(fObj);
+  sTests(tests);renderTestGrid();renderOverview();nav('pgTests');
+});
+
+const FIELD_TYPES={short:{label:'Short Text',icon:'✏️'},para:{label:'Paragraph',icon:'📄'},mcq:{label:'Multiple Choice',icon:'⭕'},check:{label:'Checkboxes',icon:'☑️'},drop:{label:'Dropdown',icon:'▾'},scale:{label:'Rating Scale',icon:'⭐'}};
+document.querySelectorAll('.add-field-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const ft=btn.dataset.ft;
+    const field={id:genId(),type:ft,label:'',required:false,options:['Option 1','Option 2','Option 3']};
+    fbFields.push(field);renderFormCanvas();
+  });
+});
+
+function renderFormCanvas(){
+  $('formEmpty').style.display=fbFields.length?'none':'block';
+  const canvas=$('formCanvas');
+  canvas.innerHTML=fbFields.map((f,i)=>{
+    const ft=FIELD_TYPES[f.type]||{label:f.type,icon:'❓'};
+    let previewHTML='';
+    if(f.type==='short') previewHTML=`<input class="preview-input" disabled placeholder="Short answer text">`;
+    else if(f.type==='para') previewHTML=`<textarea class="preview-textarea" disabled placeholder="Long answer text"></textarea>`;
+    else if(f.type==='scale') previewHTML=`<div style="display:flex;gap:8px;margin-top:4px;">${[1,2,3,4,5].map(n=>`<div style="width:34px;height:34px;border-radius:8px;background:var(--card2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--slate);">${n}</div>`).join('')}</div>`;
+    else if(['mcq','check','drop'].includes(f.type)){
+      if(f.type==='drop') previewHTML=`<select class="preview-input" disabled><option>Select an option</option>${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`;
+      else previewHTML=f.options.map(o=>`<div class="preview-option"><input type="${f.type==='check'?'checkbox':'radio'}" disabled name="prev_${f.id}"><span>${o}</span></div>`).join('');
+    }
+    const hasOpts=['mcq','check','drop'].includes(f.type);
+    return `
+      <div class="form-field-card" data-fi="${i}">
+        <button class="ffc-del" data-fi="${i}">✕</button>
+        <div class="ffc-head">
+          <span class="drag-handle">⠿</span>
+          <span class="ffc-type-badge">${ft.icon} ${ft.label}</span>
+        </div>
+        <input class="b-input" value="${f.label}" placeholder="Question / label…" data-fi="${i}" style="margin-bottom:8px;" oninput="fbFields[${i}].label=this.value">
+        ${hasOpts?`<div style="margin-bottom:8px;">
+          <label class="b-label">Options</label>
+          <div id="fopts_${i}">${f.options.map((o,oi)=>`<div class="option-row" style="margin-bottom:5px;"><input class="opt-input" value="${o}" data-fi="${i}" data-oi="${oi}" oninput="fbFields[${i}].options[${oi}]=this.value;"><button class="opt-del" onclick="fbFields[${i}].options.splice(${oi},1);renderFormCanvas();">✕</button></div>`).join('')}
+          <button class="add-opt-btn" style="margin-top:4px;" onclick="fbFields[${i}].options.push('Option '+(fbFields[${i}].options.length+1));renderFormCanvas();">＋ Add option</button>
+        </div>`:''}
+        <div class="form-preview-field">
+          <label>${f.label||'Untitled question'} ${f.required?'<span class="req-star">*</span>':''}</label>
+          ${previewHTML}
+        </div>
+        <div class="ffc-required"><input type="checkbox" ${f.required?'checked':''} onchange="fbFields[${i}].required=this.checked;renderFormCanvas();"><span>Required</span></div>
+      </div>
+    `;
+  }).join('');
+  canvas.querySelectorAll('.ffc-del').forEach(btn=>{
+    btn.addEventListener('click',()=>{fbFields.splice(parseInt(btn.dataset.fi),1);renderFormCanvas();});
+  });
+}
+
+// ══ CLASSROOMS ══
+let selSubject='';
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+    chip.classList.add('on');selSubject=chip.dataset.s;
+  });
+});
+$('createClassBtn').addEventListener('click',()=>{
+  const name=$('cc-name').value.trim();
+  clearMsg('ccMsg');
+  if(!name){msg('ccMsg','Enter a classroom name.');return;}
+  if(!selSubject){msg('ccMsg','Select a subject.');return;}
+  const cls={code:genCode(),name,subject:selSubject,color:SUBJ_C[selSubject]||'#7B90B0',owner:CU.e,ownerName:CU.fn+' '+CU.ln,students:[],created:Date.now()};
+  const all=gC();all.push(cls);sC(all);
+  $('cc-name').value='';selSubject='';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  msg('ccMsg',`✦ Created! Code: ${cls.code}`,'ok');
+  populateClassSelects();renderClassGrid();renderOverview();
+});
+
+function renderClassGrid(){
+  const mine=gC().filter(c=>c.owner===CU.e);
+  const grid=$('classGrid');
+  if(!mine.length){grid.innerHTML='<div class="empty-qs" style="grid-column:1/-1;"><span>🏫</span>No classrooms yet!</div>';return;}
+  grid.innerHTML=mine.map(c=>`
+    <div class="card class-card-v2">
+      <div class="cc-accent" style="background:${c.color}"></div>
+      <div class="cc-body">
+        <div class="cc-name">${c.name}</div>
+        <div class="cc-sub">${c.subject} · ${(c.students||[]).length} student${(c.students||[]).length!==1?'s':''}</div>
+        <div class="code-display">
+          <div><div class="code-lbl">Class Code</div><div class="code-val">${c.code}</div></div>
+          <button class="copy-btn" data-code="${c.code}">📋 Copy</button>
+        </div>
+        <div class="cc-footer">
+          <span class="cc-students">👥 ${(c.students||[]).length} joined</span>
+          <button class="btn-danger btn-sm" data-code="${c.code}">Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      navigator.clipboard.writeText(btn.dataset.code).catch(()=>{});
+      btn.innerHTML='✓ Copied!';btn.classList.add('copied');
+      setTimeout(()=>{btn.innerHTML='📋 Copy';btn.classList.remove('copied');},2000);
+    });
+  });
+  grid.querySelectorAll('.btn-danger').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(!confirm('Delete this classroom?'))return;
+      sC(gC().filter(c=>c.code!==btn.dataset.code));
+      renderClassGrid();renderOverview();populateClassSelects();
+    });
+  });
+}
+
+function populateClassSelects(){
+  const mine=gC().filter(c=>c.owner===CU.e);
+  const opts='<option value="">— No class —</option>'+mine.map(c=>`<option value="${c.code}">${c.name} (${c.code})</option>`).join('');
+  $('qb-class').innerHTML=opts;$('fb-class').innerHTML=opts;
+}
+
+// ══ RESULTS ══
+function renderResults(){
+  const myClassCodes=gC().filter(c=>c.owner===CU.e).map(c=>c.code);
+  const allRes=gRes().filter(r=>myClassCodes.includes(r.classCode));
+  const myTests=gTests().filter(t=>t.owner===CU.e);
+  // filter buttons
+  $('resultsFilter').innerHTML='<button class="filter-btn on" data-tf="all">All Tests</button>'+
+    myTests.map(t=>`<button class="filter-btn" data-tf="${t.id}">${t.title}</button>`).join('');
+  $('resultsFilter').querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      $('resultsFilter').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      const tid=btn.dataset.tf;
+      const filtered=tid==='all'?allRes:allRes.filter(r=>r.testId===tid);
+      renderResultsTable(filtered);
+    });
+  });
+  renderResultsTable(allRes);
+}
+function renderResultsTable(rows){
+  if(!rows.length){$('resultsBody').innerHTML='<div style="padding:28px;text-align:center;color:var(--slate);font-size:.85rem;">No results yet.</div>';return;}
+  $('resultsBody').innerHTML=rows.map(r=>{
+    const pct=r.score!=null?Math.round(r.score/r.total*100):0;
+    return `<div class="rt-row">
+      <div class="rt-cell"><div style="font-weight:500;">${r.studentName}</div><div style="color:var(--slate);font-size:.72rem;">${r.studentEmail||''}</div></div>
+      <div class="rt-cell" style="color:var(--slate);font-size:.8rem;">${r.testTitle||'—'}</div>
+      <div class="rt-cell"><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:${pct}%"></div></div><div class="score-pct">${r.score!=null?r.score+'/'+r.total:'—'}</div></div></div>
+      <div class="rt-cell" style="color:var(--slate);font-size:.78rem;">${r.classCode||'—'}</div>
+      <div class="rt-cell"><span class="status-pill ${r.score!=null?'done':'pend'}">${r.score!=null?'Done':'Pending'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ══ STUDENT INIT ══
+function initStudent(){
+  $('sAvatar').textContent=CU.fn[0].toUpperCase();
+  $('sName').textContent=CU.fn+' '+CU.ln;
+  showApp('student');showSPanel('sJoin');
+  $('codeInp').value='';$('foundCard').classList.remove('on');$('startTestBtn').classList.remove('on');$('joinMsg').className='join-msg';
+}
+$('studentSignout').addEventListener('click',()=>{CU=null;CR='';$('studentApp').classList.remove('active');showAuth('authRole');});
+$('scHome').addEventListener('click',()=>{initStudent();});
+$('formDoneHome').addEventListener('click',()=>{initStudent();});
+
+function showSPanel(id){['sJoin','sQuiz','sForm','sScore','sFormDone'].forEach(p=>$(p).style.display=p===id?'block':'none');}
+
+// Code lookup
+let foundClassObj=null, foundTestObj=null;
+$('codeInp').addEventListener('input',()=>{
+  $('codeInp').value=$('codeInp').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  $('foundCard').classList.remove('on');$('startTestBtn').classList.remove('on');foundClassObj=null;foundTestObj=null;
+  $('joinMsg').className='join-msg';
+});
+$('codeInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('lookupBtn').click();});
+
+$('lookupBtn').addEventListener('click',()=>{
+  const code=$('codeInp').value.trim();
+  $('foundCard').classList.remove('on');$('startTestBtn').classList.remove('on');$('joinMsg').className='join-msg';
+  if(code.length<6){showJMsg('Enter a 6-character code.','err');return;}
+  const cls=gC().find(c=>c.code===code);
+  if(!cls){showJMsg('No classroom found with that code.','err');return;}
+  foundClassObj=cls;
+  $('foundAccent').style.background=cls.color;
+  $('foundName').textContent=cls.name;
+  $('foundSubject').textContent='📚 '+cls.subject;
+  $('foundTeacher').textContent='👩‍🏫 '+cls.ownerName;
+  // list active tests in this class
+  const tests=gTests().filter(t=>t.classCode===code&&t.active);
+  const tList=$('foundTestsList');
+  if(!tests.length){tList.innerHTML='<div style="font-size:.78rem;color:var(--slate);">No active tests in this class right now.</div>';}
+  else {
+    tList.innerHTML=tests.map(t=>`<button class="btn-secondary btn-sm" style="text-align:left;" data-tid="${t.id}">${t.type==='quiz'?'📋':'📝'} ${t.title}</button>`).join('');
+    tList.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tList.querySelectorAll('button').forEach(b=>b.style.borderColor='');
+        btn.style.borderColor='var(--blue)';
+        foundTestObj=tests.find(t=>t.id===btn.dataset.tid);
+        $('startTestBtn').classList.add('on');
+      });
+    });
+  }
+  $('foundCard').classList.add('on');
+  showJMsg('✦ Classroom found! Select a test below.','ok');
+});
+
+function showJMsg(t,type){const e=$('joinMsg');e.textContent=t;e.className='join-msg '+type+' on';}
+
+$('startTestBtn').addEventListener('click',()=>{
+  if(!foundTestObj||!foundClassObj)return;
+  // join roster
+  const classes=gC();const cls=classes.find(c=>c.code===foundClassObj.code);
+  if(cls&&!cls.students.includes(CU.e)){cls.students.push(CU.e);sC(classes);}
+  // create result record
+  const results=gRes();
+  if(!results.find(r=>r.testId===foundTestObj.id&&r.studentEmail===CU.e)){
+    results.push({testId:foundTestObj.id,testTitle:foundTestObj.title,classCode:foundClassObj.code,studentEmail:CU.e,studentName:CU.fn+' '+CU.ln,score:null,total:null,created:Date.now()});
+    sRes(results);
+  }
+  if(foundTestObj.type==='quiz') startQuiz(foundTestObj,foundClassObj);
+  else startForm(foundTestObj,foundClassObj);
+});
+
+// ══ QUIZ PLAY ══
+let playQ=[],playCur=0,playScore=0,playAnswered=false,playTimer=null,playTLeft=15,playTest=null,playCls=null;
+const CIRC=2*Math.PI*22, LBLS=['A','B','C','D','E','F'];
+
+function startQuiz(test,cls){
+  playTest=test;playCls=cls;
+  playQ=[...test.questions].sort(()=>Math.random()-.5);
+  playCur=0;playScore=0;playAnswered=false;
+  $('qDot').style.background=cls.color;
+  $('qClassName').textContent=cls.name;
+  showSPanel('sQuiz');loadQ();
+}
+function loadQ(){
+  playAnswered=false;
+  const q=playQ[playCur],tot=playQ.length;
+  $('qProgressFill').style.width=(playCur/tot*100)+'%';
+  $('arcFill').style.strokeDashoffset=CIRC-(playCur/tot)*CIRC;
+  $('arcLabel').textContent=`${playCur+1}/${tot}`;
+  $('catTag').textContent=q.type==='tf'?'True/False':'MCQ';
+  $('quizQ').textContent=q.text;
+  $('ansGrid').innerHTML='';
+  const opts=q.options;
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='ans-btn';
+    b.innerHTML=`<span class="ans-lbl">${LBLS[i]}</span>${o.text}`;
+    b.addEventListener('click',()=>pickAns(i));
+    $('ansGrid').appendChild(b);
+  });
+  $('qFb').className='q-fb';$('nextQBtn').className='next-q-btn';
+  resetTimer();startTimer(playTest.timeLimit||15);
+}
+function startTimer(secs){playTLeft=secs;updTimer();playTimer=setInterval(()=>{playTLeft--;updTimer();if(playTLeft<=0){clearInterval(playTimer);if(!playAnswered)timeUp();}},1000);}
+function updTimer(){$('timerFill').style.width=(playTLeft/(playTest.timeLimit||15)*100)+'%';$('timerFill').style.background=playTLeft<=5?'#EF4444':playTLeft<=8?'#F59E0B':'#3B6FFF';$('timerNum').textContent=playTLeft;}
+function resetTimer(){clearInterval(playTimer);$('timerFill').style.width='100%';$('timerFill').style.background='#3B6FFF';$('timerNum').textContent=playTest.timeLimit||15;}
+function timeUp(){playAnswered=true;const btns=$('ansGrid').querySelectorAll('.ans-btn');btns.forEach(b=>b.disabled=true);const ci=playQ[playCur].options.findIndex(o=>o.correct);if(ci>-1)btns[ci].classList.add('correct');btns.forEach((b,i)=>{if(i!==ci)b.classList.add('reveal');});showQFb(false,"Time's up!");$('nextQBtn').className='next-q-btn on';}
+function pickAns(i){
+  if(playAnswered)return;playAnswered=true;clearInterval(playTimer);
+  const ci=playQ[playCur].options.findIndex(o=>o.correct);
+  const btns=$('ansGrid').querySelectorAll('.ans-btn');
+  btns.forEach(b=>b.disabled=true);
+  if(i===ci){playScore++;btns[i].classList.add('correct');showQFb(true,'Correct!');}
+  else{btns[i].classList.add('wrong');btns[ci].classList.add('correct');btns.forEach((b,j)=>{if(j!==i&&j!==ci)b.classList.add('reveal');});showQFb(false,`Not quite — the answer is ${playQ[playCur].options[ci].text}.`);}
+  $('nextQBtn').className='next-q-btn on';
+}
+function showQFb(ok,t){$('qFbIcon').textContent=ok?'✓':'✕';$('qFbText').textContent=t;$('qFb').className=`q-fb ${ok?'c':'w'} on`;}
+$('nextQBtn').addEventListener('click',()=>{playCur++;if(playCur>=playQ.length)endQuiz();else loadQ();});
+$('qExitBtn').addEventListener('click',()=>{clearInterval(playTimer);showSPanel('sJoin');});
+
+function endQuiz(){
+  $('arcFill').style.strokeDashoffset=0;$('qProgressFill').style.width='100%';
+  const results=gRes();const r=results.find(x=>x.testId===playTest.id&&x.studentEmail===CU.e);
+  if(r){r.score=playScore;r.total=playQ.length;sRes(results);}
+  showSPanel('sScore');
+  const pct=playScore/playQ.length;
+  let emoji,hl;
+  if(pct===1){emoji='🏆';hl='Perfect score!';}else if(pct>=.8){emoji='🎉';hl='Excellent!';}else if(pct>=.6){emoji='👍';hl='Good job!';}else if(pct>=.4){emoji='🤔';hl='Keep practicing!';}else{emoji='📚';hl='Study up!';}
+  $('scEmoji').textContent=emoji;$('scHeadline').textContent=hl;$('scSub').textContent='Well done, '+CU.fn+'!';$('scClass').textContent='✦ '+playCls.name+' · '+playTest.title;
+  $('scDen').textContent='out of '+playQ.length+' correct';$('scBig').textContent=0;
+  let n=0;const step=()=>{if(n<playScore){n++;$('scBig').textContent=n;requestAnimationFrame(step);}};requestAnimationFrame(step);
+}
+$('scAgain').addEventListener('click',()=>startQuiz(playTest,playCls));
+
+// ══ FORM PLAY ══
+let playForm=null,playFormCls=null;
+function startForm(test,cls){
+  playForm=test;playFormCls=cls;
+  $('formPlayTitle').textContent=test.title;
+  $('formPlayDesc').textContent=test.desc||'';
+  const fields=$('formPlayFields');
+  fields.innerHTML=test.fields.map((f,i)=>{
+    const req=f.required?'<span class="req"> *</span>':'';
+    let inputHTML='';
+    if(f.type==='short') inputHTML=`<input class="form-play-input" id="ff_${i}" placeholder="Your answer">`;
+    else if(f.type==='para') inputHTML=`<textarea class="form-play-textarea" id="ff_${i}" placeholder="Your answer"></textarea>`;
+    else if(f.type==='scale') inputHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;">${[1,2,3,4,5].map(n=>`<label style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scale_${i}" value="${n}" style="accent-color:var(--blue);"> <span style="font-size:.8rem;">${n}</span></label>`).join('')}</div>`;
+    else if(f.type==='drop') inputHTML=`<select class="form-play-select" id="ff_${i}"><option value="">Choose…</option>${(f.options||[]).map(o=>`<option>${o}</option>`).join('')}</select>`;
+    else if(['mcq','check'].includes(f.type)){
+      const itype=f.type==='check'?'checkbox':'radio';
+      inputHTML=(f.options||[]).map(o=>`<div class="form-play-option"><input type="${itype}" name="fp_${i}" value="${o}"><span>${o}</span></div>`).join('');
+    }
+    return `<div class="form-play-field"><label>${f.label||'Untitled'}${req}</label>${inputHTML}</div>`;
+  }).join('');
+  $('formPlayMsg').className='msg-bar';
+  showSPanel('sForm');
+}
+$('submitFormBtn').addEventListener('click',()=>{
+  // basic required check
+  let ok=true;
+  playForm.fields.forEach((f,i)=>{
+    if(!f.required)return;
+    const el=$('ff_'+i);
+    if(el&&!el.value.trim()){ok=false;}
+  });
+  if(!ok){msg('formPlayMsg','Please fill in all required fields.','err');return;}
+  // save response
+  const results=gRes();const r=results.find(x=>x.testId===playForm.id&&x.studentEmail===CU.e);
+  if(r){r.score='Submitted';r.total='—';sRes(results);}
+  showSPanel('sFormDone');
+});
+</script>
+</body>
+</html>
