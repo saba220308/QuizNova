@@ -50,7 +50,6 @@ Many learners struggle to find a simple and distraction-free platform for practi
 **Your Name**
 sabarish 
 
-* GitHub: [https://github.com/your-username](https://github.com/your-username)
 * Project: QuizNova
 
 ---
